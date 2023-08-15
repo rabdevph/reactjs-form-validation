@@ -2,6 +2,8 @@ import { useState } from 'react';
 
 import { FormInput } from './components/FormInput.jsx';
 
+import { updateState, isValidInput } from './utils/utils.js';
+
 import './app.css';
 
 const defaulValues = {
@@ -67,47 +69,11 @@ function App() {
     },
   ];
 
-  const updateVal = (property, value) => {
-    setValues((prevState) => {
-      return {
-        ...prevState,
-        [property]: {
-          ...prevState[property],
-          val: value,
-        },
-      };
-    });
-  };
-
-  const updateIsEmpty = (property, bool) => {
-    setValues((prevState) => {
-      return {
-        ...prevState,
-        [property]: {
-          ...prevState[property],
-          isEmpty: bool,
-        },
-      };
-    });
-  };
-
-  const updateIsValid = (property, bool) => {
-    setValues((prevState) => {
-      return {
-        ...prevState,
-        [property]: {
-          ...prevState[property],
-          isValid: bool,
-        },
-      };
-    });
-  };
-
   const checkEmptyInput = (value, property) => {
     if (value.trim() === '') {
-      updateIsEmpty(property, true);
+      updateState(setValues, property, 'isEmpty', true);
     } else {
-      updateIsEmpty(property, false);
+      updateState(setValues, property, 'isEmpty', false);
     }
   };
 
@@ -115,49 +81,34 @@ function App() {
     return Object.values(values).every((value) => value.val !== '');
   };
 
-  const isValidUsername = (username) => {
-    const pattern = /^[A-Za-z0-9]{3,12}$/;
-    return pattern.test(username);
-  };
-
-  const isValidEmail = (email) => {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return emailRegex.test(email);
-  };
-
-  const isValidPassword = (password) => {
-    const pattern = /^(?=.*[0-9])(?=.*[A-Z])(?!.*\s).{4,16}$/;
-    return pattern.test(password);
-  };
-
-  const arePasswordsMatch = (password, confirmPassword) => {
-    return password === confirmPassword;
-  };
-
   const checkValidInput = () => {
-    if (!isValidUsername(values.username.val)) {
-      updateIsValid('username', false);
+    if (!isValidInput('username', values.username.val)) {
+      updateState(setValues, 'username', 'isValid', false);
     }
 
-    if (!isValidEmail(values.email.val)) {
-      updateIsValid('email', false);
+    if (!isValidInput('email', values.email.val)) {
+      updateState(setValues, 'email', 'isValid', false);
     }
 
-    if (!isValidPassword(values.password.val)) {
-      updateIsValid('password', false);
+    if (!isValidInput('password', values.password.val)) {
+      updateState(setValues, 'password', 'isValid', false);
     }
 
-    if (!arePasswordsMatch(values.password.val, values.confirmPassword.val)) {
-      updateIsValid('confirmPassword', false);
+    if (
+      !isValidInput('confirmPassword', values.confirmPassword.val, {
+        password: values.password.val,
+      })
+    ) {
+      updateState(setValues, 'confirmPassword', 'isValid', false);
     }
   };
 
   const areAllInputsValid = () => {
     return (
-      isValidUsername(values.username.val) &&
-      isValidEmail(values.email.val) &&
-      isValidPassword(values.password.val) &&
-      arePasswordsMatch(values.password.val, values.confirmPassword.val)
+      isValidInput('username', values.username.val) &&
+      isValidInput('email', values.email.val) &&
+      isValidInput('password', values.password.val) &&
+      isValidInput('confirmPassword', values.confirmPassword.val, { password: values.password.val })
     );
   };
 
@@ -180,9 +131,9 @@ function App() {
   };
 
   const handleChange = (e) => {
-    updateVal(e.target.name, e.target.value);
-    updateIsEmpty(e.target.name, false);
-    updateIsValid(e.target.name, true);
+    updateState(setValues, e.target.name, 'val', e.target.value);
+    updateState(setValues, e.target.name, 'isEmpty', false);
+    updateState(setValues, e.target.name, 'isValid', true);
   };
 
   return (
