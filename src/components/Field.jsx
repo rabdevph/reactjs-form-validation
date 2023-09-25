@@ -2,17 +2,7 @@ import { useState } from 'react';
 import visible from '../assets/images/visibility_on.svg';
 import invisible from '../assets/images/visibility_off.svg';
 
-const Field = ({
-  id,
-  name,
-  type,
-  placeholder,
-  label,
-  sibling,
-  error,
-  handleChange,
-  handleBlur,
-}) => {
+const Field = ({ error, handleChange, handleBlur, ...field }) => {
   const [isInputVisible, setIsInputVisible] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
 
@@ -32,10 +22,17 @@ const Field = ({
     handleBlur(event);
   };
 
+  // Handle key down event - enter key
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      setIsFocused(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="text-xs">
-        {label}
+      <label htmlFor={field.id} className="text-xs">
+        {field.label}
       </label>
       <div
         className={`border-2 ${
@@ -43,17 +40,18 @@ const Field = ({
         } flex gap-1 p-2`}
       >
         <input
-          id={id}
-          name={name}
-          type={isInputVisible ? 'text' : type}
-          placeholder={placeholder}
+          id={field.id}
+          name={field.name}
+          type={isInputVisible ? 'text' : field.type}
+          placeholder={field.placeholder}
           autoComplete="off"
           className={`bg-transparent w-full outline-none text-base placeholder:text-slate-400`}
           onChange={handleChange}
+          onKeyDown={handleKeyDown}
           onFocus={handleFieldFocus}
           onBlur={handleFieldBlur}
         />
-        {sibling ? (
+        {field.sibling ? (
           <button type="button" onClick={handleTogglePassword} className="border-none outline-none">
             <img src={isInputVisible ? invisible : visible} alt="" className="h-5 w-5" />
           </button>
